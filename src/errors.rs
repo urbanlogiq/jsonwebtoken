@@ -92,7 +92,7 @@ impl StdError for Error {
             ErrorKind::Base64(ref err) => err.description(),
             ErrorKind::Json(ref err) => err.description(),
             ErrorKind::Utf8(ref err) => err.description(),
-            ErrorKind::Crypto(ref err) => err.description(),
+            ErrorKind::Crypto(ref err) => "something broke in ring",
             _ => unreachable!(),
         }
     }
@@ -112,7 +112,7 @@ impl StdError for Error {
             ErrorKind::Base64(ref err) => Some(err),
             ErrorKind::Json(ref err) => Some(err),
             ErrorKind::Utf8(ref err) => Some(err),
-            ErrorKind::Crypto(ref err) => Some(err),
+            ErrorKind::Crypto(ref err) => None,
             _ => unreachable!(),
         }
     }
