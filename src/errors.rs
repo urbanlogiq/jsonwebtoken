@@ -77,27 +77,7 @@ pub enum ErrorKind {
 }
 
 impl StdError for Error {
-    fn description(&self) -> &str {
-        match *self.0 {
-            ErrorKind::InvalidToken => "invalid token",
-            ErrorKind::InvalidSignature => "invalid signature",
-            ErrorKind::InvalidEcdsaKey => "invalid ECDSA key",
-            ErrorKind::InvalidRsaKey => "invalid RSA key",
-            ErrorKind::ExpiredSignature => "expired signature",
-            ErrorKind::InvalidIssuer => "invalid issuer",
-            ErrorKind::InvalidAudience => "invalid audience",
-            ErrorKind::InvalidSubject => "invalid subject",
-            ErrorKind::ImmatureSignature => "immature signature",
-            ErrorKind::InvalidAlgorithm => "algorithms don't match",
-            ErrorKind::Base64(ref err) => err.description(),
-            ErrorKind::Json(ref err) => err.description(),
-            ErrorKind::Utf8(ref err) => err.description(),
-            ErrorKind::Crypto(ref err) => "something broke in ring",
-            _ => unreachable!(),
-        }
-    }
-
-    fn cause(&self) -> Option<&StdError> {
+    fn cause(&self) -> Option<&dyn StdError> {
         match *self.0 {
             ErrorKind::InvalidToken => None,
             ErrorKind::InvalidSignature => None,
@@ -112,7 +92,7 @@ impl StdError for Error {
             ErrorKind::Base64(ref err) => Some(err),
             ErrorKind::Json(ref err) => Some(err),
             ErrorKind::Utf8(ref err) => Some(err),
-            ErrorKind::Crypto(ref err) => None,
+            ErrorKind::Crypto(_) => None,
             _ => unreachable!(),
         }
     }

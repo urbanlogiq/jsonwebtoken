@@ -1,4 +1,5 @@
 use base64;
+use base64::Engine;
 use serde::de::DeserializeOwned;
 use serde::ser::Serialize;
 use serde_json::map::Map;
@@ -19,12 +20,14 @@ pub struct TokenData<T> {
 /// Serializes to JSON and encodes to base64
 pub fn to_jwt_part<T: Serialize>(input: &T) -> Result<String> {
     let encoded = to_string(input)?;
-    Ok(base64::encode_config(encoded.as_bytes(), base64::URL_SAFE_NO_PAD))
+    let engine = base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    Ok(engine.encode(encoded.as_bytes()))
 }
 
 /// Decodes from base64 and deserializes from JSON to a struct
 pub fn from_jwt_part<B: AsRef<str>, T: DeserializeOwned>(encoded: B) -> Result<T> {
-    let decoded = base64::decode_config(encoded.as_ref(), base64::URL_SAFE_NO_PAD)?;
+    let engine = base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    let decoded = engine.decode(encoded.as_ref())?;
     let s = String::from_utf8(decoded)?;
 
     Ok(from_str(&s)?)
@@ -34,7 +37,8 @@ pub fn from_jwt_part<B: AsRef<str>, T: DeserializeOwned>(encoded: B) -> Result<T
 pub fn from_jwt_part_claims<B: AsRef<str>, T: DeserializeOwned>(
     encoded: B,
 ) -> Result<(T, Map<String, Value>)> {
-    let decoded = base64::decode_config(encoded.as_ref(), base64::URL_SAFE_NO_PAD)?;
+    let engine = base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    let decoded = engine.decode(encoded.as_ref())?;
     let s = String::from_utf8(decoded)?;
 
     let claims: T = from_str(&s)?;

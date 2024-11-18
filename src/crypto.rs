@@ -1,6 +1,7 @@
 use base64;
+use base64::Engine;
 use ring::constant_time::verify_slices_are_equal;
-use ring::{digest, hmac, rand, signature};
+use ring::signature;
 use std::str::FromStr;
 use untrusted;
 
@@ -57,7 +58,7 @@ impl FromStr for Algorithm {
 /// the base64 url safe encoded of the result.
 ///
 /// Only use this function if you want to do something other than JWT.
-pub fn sign(signing_input: &str, key: &[u8], algorithm: Algorithm) -> Result<String> {
+pub fn sign(_signing_input: &str, _key: &[u8], _algorithm: Algorithm) -> Result<String> {
     unimplemented!()
 }
 
@@ -68,7 +69,8 @@ fn verify_ring(
     signing_input: &str,
     key: &[u8],
 ) -> Result<bool> {
-    let signature_bytes = base64::decode_config(signature, base64::URL_SAFE_NO_PAD)?;
+    let engine = base64::engine::general_purpose::URL_SAFE_NO_PAD;
+    let signature_bytes = engine.decode(signature)?;
     let public_key_der = untrusted::Input::from(key);
     let message = untrusted::Input::from(signing_input.as_bytes());
     let expected_signature = untrusted::Input::from(signature_bytes.as_slice());
